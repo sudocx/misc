@@ -1,0 +1,79 @@
+set encoding=utf-8
+set fileencodings=ucs-bom,utf-8,cp936,gb18030,big5,euc-jp,euc-kr,latin1
+set langmenu=zh_CN.utf-8
+set imcmdline
+
+syntax on
+set nu
+set autoindent
+set smartindent
+set mouse=a
+set backspace=2
+set tabstop=4
+set softtabstop=4
+set expandtab
+set ai!
+set cindent shiftwidth=4
+set cursorline
+highlight CursorLine ctermbg=darkblue ctermfg=grey cterm=bold
+set colorcolumn=130
+highlight ColorColumn ctermbg=green
+"set cursorcolumn
+set showcmd
+"set cmdheight=2
+set hlsearch
+set ignorecase
+set history=1024
+set wrap
+set showmatch
+
+"display TAB key
+set list
+"set listchars=tab:>-,trail:-
+set listchars=tab:\ \
+
+"set wildmen
+set fileformats=unix
+
+set laststatus=2
+
+"set statusline=%<%F%h%m%r%h%w%y\ %{}&ff}\ %{}strftime()\""%d/%m/%y\ -\ %H:%M\"")}%=\ ascii:%b\ lin:%l\,%L\ %P
+"set statusline=[%F]%y%r%m%*%=%=\ ascii:%b\ Line:[%l/%L],Column:[%c][%p%%]
+set statusline=[%F]%h%y%r%w%m%*%=%=\ ascii:%b\ Line:[%l/%L],Column:[%c][%p%%]
+highlight StatusLine cterm=bold ctermfg=yellow ctermbg=blue
+set ruler
+
+
+filetype on
+filetype plugin on
+filetype plugin indent on
+
+":let hs_highlight_delimiters=1            "高亮定界符
+":let hs_highlight_boolean=1               "把True和False识别为关键字
+":let hs_highlight_types=1                 "把基本类型的名字识别为关键字
+":let hs_highlight_more_types=1            "把更多常用类型识别为关键字
+":let hs_highlight_debug=1                 "高亮调试函数的名字
+":let hs_allow_hash_operator=1             "阻止把#高亮为错误 
+
+"Taglist
+"find . | grep -E -i ''\.c$|\.h$|\.s$|\.cpp$|\.cxx$|\.cc$|\.java$|\.hh$|\.lds$'' > cscope.files
+nmap tl :Tlist<ENTER>
+"map <silent> <F4> :TlistToggle<cr>
+let Tlist_Exit_OnlyWindow=1
+"let Tlist_Use_Right_Window=1
+let Tlist_File_Fold_Auto_Close=1
+
+nmap <F2> <C-W>w
+nmap <F12> :q!<ENTER>
+
+inoremap ( () <RIGHT>
+inoremap { {} <LEFT>
+inoremap [ [] <LEFT>
+inoremap ' '' <LEFT>
+inoremap " "" <LEFT>
+
+nmap <Space> %
+vmap <Space> %
+
+nmap ma :set mouse=a<CR>
+nmap m<Space> :set mouse=<CR>
