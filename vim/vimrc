@@ -29,31 +29,42 @@ set showmatch
 
 "display TAB key
 set list
-"set listchars=tab:>-,trail:-
-set listchars=tab:\ \
+set listchars=tab:>-,trail:-
 
-"set wildmen
 set fileformats=unix
 
 set laststatus=2
 
 "set statusline=%<%F%h%m%r%h%w%y\ %{}&ff}\ %{}strftime()\""%d/%m/%y\ -\ %H:%M\"")}%=\ ascii:%b\ lin:%l\,%L\ %P
-"set statusline=[%F]%y%r%m%*%=%=\ ascii:%b\ Line:[%l/%L],Column:[%c][%p%%]
 set statusline=[%F]%h%y%r%w%m%*%=%=\ ascii:%b\ Line:[%l/%L],Column:[%c][%p%%]
 highlight StatusLine cterm=bold ctermfg=yellow ctermbg=blue
 set ruler
 
+"set for vbundle
+set nocompatible
+filetype off
+set rtp+=~/.vim/bundle/vundle/
+call vundle#rc()
+Bundle 'gmarik/vundle'
+
+"original repos on git hub
+Bundle 'kien/ctrlp.vim'
+Bundle 'sukima/xmledit'
+Bundle 'jiangmiao/auto-pairs'
+Bundle 'klen.python-mode'
+Bundle 'Valloric/ListToggle'
+Bundle 'EasyGrep'
+Bundle 'ShowPairs'
+Bundle 'SudoEdit.vim'
 
 filetype on
 filetype plugin on
 filetype plugin indent on
 
-":let hs_highlight_delimiters=1            "高亮定界符
-":let hs_highlight_boolean=1               "把True和False识别为关键字
-":let hs_highlight_types=1                 "把基本类型的名字识别为关键字
-":let hs_highlight_more_types=1            "把更多常用类型识别为关键字
-":let hs_highlight_debug=1                 "高亮调试函数的名字
-":let hs_allow_hash_operator=1             "阻止把#高亮为错误 
+"indent line
+let g:indentLine_enabled=1
+let g:indentLine_color_term=239
+let g:indentLine_char='¦'
 
 "Taglist
 "find . | grep -E -i ''\.c$|\.h$|\.s$|\.cpp$|\.cxx$|\.cc$|\.java$|\.hh$|\.lds$'' > cscope.files
@@ -66,11 +77,120 @@ let Tlist_File_Fold_Auto_Close=1
 nmap <F2> <C-W>w
 nmap <F12> :q!<ENTER>
 
-inoremap ( () <RIGHT>
-inoremap { {} <LEFT>
-inoremap [ [] <LEFT>
-inoremap ' '' <LEFT>
-inoremap " "" <LEFT>
+"inoremap ( () <LEFT>
+"inoremap { {} <LEFT>
+"inoremap [ [] <LEFT>
+"inoremap ' '' <LEFT>
+"inoremap " "" <LEFT>
+
+"Auto completion using the TAB key " 自动补全括号，引号
+""This function determines, wether we are on
+"the start of the line text(then tab indents)
+""or if we want to try auto completion
+function! InsertTabWrapper()
+    let col=col('.')-1
+    if !col || getline('.')[col-1] !~ '\k'
+        return "\<TAB>"
+    else
+        return "\<C-N>"
+    endif
+endfunction
+
+"Remap the tab key to select action with InsertTabWrapper
+"inoremap <TAB> <C-R>=InsertTabWrapper()<CR>
+:inoremap ( ()<ESC>i
+:inoremap  ) <c-r>=ClosePair(')')<CR>
+:inoremap { {}<ESC>i
+:inoremap  } <c-r>=ClosePair('}')<CR>
+:inoremap [ []<ESC>i
+:inoremap  ] <c-r>=ClosePair(']')<CR>
+:inoremap < <><ESC>i
+:inoremap > <c-r>=ClosePair('>')<CR>
+:inoremap " ""<ESC>i
+:inoremap ' ''<ESC>i'"
+function! ClosePair(char)
+    if getline('.')[col('.') - 1] == a:char
+        return "\<Right>"
+    else
+        return a:char
+    endif
+endf
+
+" =========
+" AutoCmd
+" =========
+if has("autocmd")
+    filetype plugin indent on
+
+    " 括号自动补全
+    func! AutoClose()
+        :inoremap ( ()<ESC>i
+        ":inoremap " ""<ESC>i
+        ":inoremap ' ''<ESC>i
+        :inoremap { {}<ESC>i
+        :inoremap [ []<ESC>i
+        :inoremap ) <c-r>=ClosePair(')')<CR>
+        :inoremap } <c-r>=ClosePair('}')<CR>
+        :inoremap ] <c-r>=ClosePair(']')<CR>
+    endf
+
+    func! ClosePair(char)
+        if getline('.')[col('.') - 1] == a:char
+            return "\<Right>"
+        else
+            return a:char
+        endif
+    endf
+
+    augroup vimrcEx
+        au!
+        autocmd FileType text setlocal textwidth=80
+        autocmd BufReadPost *
+                    \ if line("'\"") > 0 && line("'\"") <= line("$") |
+                    \   exe "normal g`\"" |
+                    \ endif
+    augroup END
+
+    "auto close quotation marks for PHP, Javascript, etc, file
+    au FileType php,c,python,javascript exe AutoClose()
+
+    " Auto Check Syntax
+    au BufWritePost,FileWritePost *.js,*.php call CheckSyntax(1)
+
+    " JavaScript 语法高亮
+    au FileType html,javascript let g:javascript_enable_domhtmlcss = 1
+
+    " 给 Javascript 文件添加 Dict
+    if has('gui_macvim') || has('unix')
+        au FileType javascript setlocal dict+=~/.vim/dict/javascript.dict
+    else
+        au FileType javascript setlocal dict+=$VIM/vimfiles/dict/javascript.dict
+    endif
+
+    " 格式化 JavaScript 文件
+    "au FileType javascript map <f12> :call g:Jsbeautify()<cr>
+    au FileType javascript set omnifunc=javascriptcomplete#CompleteJS
+
+    " 给 CSS 文件添加 Dict
+    if has('gui_macvim') || has('unix')
+        au FileType css setlocal dict+=~/.vim/dict/css.dict
+    else
+        au FileType css setlocal dict+=$VIM/vimfiles/dict/css.dict
+    endif
+
+    " 增加 ActionScript 语法支持
+    au BufNewFile,BufRead *.as setf actionscript
+
+    " 自动最大化窗口
+    if has('gui_running')
+        if has("win32")
+            au GUIEnter * simalt ~x
+        "elseif has("unix")
+            "au GUIEnter * winpos 0 0
+            "set lines=999 columns=999
+        endif
+    endif
+endif
 
 nmap <Space> %
 vmap <Space> %
